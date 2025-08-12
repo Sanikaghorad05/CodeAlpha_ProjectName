@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔥 Ultra Stylish Image Gallery</title>
+  <style>
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: url('https://images.unsplash.com/photo-1503264116251-35a269479413?ixlib=rb-4.0.3&auto=format&fit=crop&w=2100&q=80') no-repeat center center fixed;
+    background-size: cover;
+    background-attachment: fixed;
+    color: #fff;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7); /* Dark overlay */
+    z-index: -1;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 3rem;
+    margin: 30px;
+    background: linear-gradient(to right, #00f2fe, #4facfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .filter-buttons {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .filter-buttons button {
+    padding: 12px 25px;
+    margin: 6px;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-weight: bold;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .filter-buttons button:hover,
+  .filter-buttons button.active {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(0, 198, 255, 0.7);
+  }
+
+  .gallery {
+    column-count: 3;
+    column-gap: 20px;
+    padding: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .gallery {
+      column-count: 2;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gallery {
+      column-count: 1;
+    }
+  }
+
+  .gallery-item {
+    position: relative;
+    margin-bottom: 20px;
+    overflow: hidden;
+    border-radius: 20px;
+    transform: scale(1);
+    transition: all 0.4s ease;
+    break-inside: avoid;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+  }
+
+  .gallery-item:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+  }
+
+  .gallery-item img {
+    width: 100%;
+    border-radius: 20px;
+    display: block;
+    transition: all 0.3s ease;
+  }
+
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    flex-direction: column;
+  }
+
+  .lightbox.active {
+    display: flex;
+  }
+
+  .lightbox img {
+    max-width: 90%;
+    max-height: 80vh;
+    border-radius: 20px;
+    animation: zoomIn 0.4s ease;
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+  }
+
+  @keyframes zoomIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .nav-button {
+    font-size: 3rem;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 20px;
+  }
+
+  .prev { left: 30px; }
+  .next { right: 30px; }
+
+  .lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 2rem;
+    cursor: pointer;
+  }
+</style>
+
+</head>
+<body>
+
+<h1>🔥 Explore The Gallery</h1>
+
+<div class="filter-buttons">
+  <button class="active" onclick="filterGallery('all')">All</button>
+  <button onclick="filterGallery('nature')">Nature</button>
+  <button onclick="filterGallery('Dogs')">Dogs</button>
+  <button onclick="filterGallery('space')">Space</button>
+</div>
+
+<div class="gallery" id="gallery">
+  <div class="gallery-item" data-category="nature"><img src="https://picsum.photos/id/1011/600/400" alt=""></div>
+  <div class="gallery-item" data-category="Dogs"><img src="https://picsum.photos/id/1025/600/800" alt=""></div>
+  <div class="gallery-item" data-category="space"><img src="./images/space-pictures-mq90a1xsulbki4al.jpg" alt=" "></div>
+  <div class="gallery-item" data-category="nature"><img src="https://picsum.photos/id/1043/600/500" alt=""></div>
+  <div class="gallery-item" data-category="Dogs"><img src="https://picsum.photos/id/1062/500/700" alt=""></div>
+  <div class="gallery-item" data-category="space"><img src="./images/space2.jpg" alt=""></div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <span class="lightbox-close" onclick="lightbox.classList.remove('active')">✖</span>
+  <button class="nav-button prev" onclick="changeSlide(-1)">❮</button>
+  <img id="lightbox-img" src="">
+  <button class="nav-button next" onclick="changeSlide(1)">❯</button>
+</div>
+
+<script>
+  const galleryItems = document.querySelectorAll('.gallery-item');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const filterBtns = document.querySelectorAll('.filter-buttons button');
+  let currentIndex = 0;
+
+  galleryItems.forEach((item, index) => {
+    item.addEventListener('click', () => {
+      currentIndex = index;
+      openLightbox(item.querySelector('img').src);
+    });
+  });
+
+  function openLightbox(src) {
+    lightboxImg.src = src;
+    lightbox.classList.add('active');
+  }
+
+  function changeSlide(direction) {
+    const visibleItems = Array.from(galleryItems).filter(item => item.style.display !== 'none');
+    currentIndex += direction;
+    if (currentIndex < 0) currentIndex = visibleItems.length - 1;
+    if (currentIndex >= visibleItems.length) currentIndex = 0;
+    lightboxImg.src = visibleItems[currentIndex].querySelector('img').src;
+  }
+
+  function filterGallery(category) {
+    filterBtns.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    galleryItems.forEach(item => {
+      const cat = item.getAttribute('data-category');
+      item.style.display = (category === 'all' || cat === category) ? 'block' : 'none';
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'ArrowLeft') changeSlide(-1);
+    if (e.key === 'ArrowRight') changeSlide(1);
+    if (e.key === 'Escape') lightbox.classList.remove('active');
+  });
+</script>
+
+</body>
+</html>
